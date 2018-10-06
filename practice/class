@@ -1,0 +1,18 @@
+declare
+fun {ClassCounter} C Incr Read in
+   C = {NewCell 0}
+   fun {Incr}
+      C := @C + 1
+      @C
+   end
+   fun {Read}
+      @C
+   end
+   counter(incr:Incr read:Read)
+end
+
+declare
+Counter1 = {ClassCounter}
+Counter2 = {ClassCounter}
+{Browse {Counter1.incr}}
+{Browse {Counter2.read}}

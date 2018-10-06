@@ -1,0 +1,29 @@
+declare
+fun {Add X Y} X+Y end
+fun {Mul X Y} X*Y end
+{Browse {Add 2 3}}
+{Browse {Mul 2 3}}
+
+fun {GenericFact Op InitVal N}
+   if N == 0 then InitVal
+   else {Op N {GenericFact Op InitVal (N-1)}}
+   end
+end
+
+fun {FactUsingGeneric N}
+   {GenericFact Mul 1 N}
+end
+fun {GaussSumUsingGeneric N}
+   {GenericFact Add 0 N}
+end
+{Browse {FactUsingGeneric 5}}
+{Browse {GaussSumUsingGeneric 5}}
+
+thread P1 in
+   P1 = {FactUsingGeneric 5}
+   {Browse P1}
+end
+thread P2 in
+   P2 = {GaussSumUsingGeneric 5}
+   {Browse P2}
+end

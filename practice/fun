@@ -1,0 +1,5 @@
+declare
+fun {Minus X}
+    ~X
+    end
+{Browse {Minus 15}}

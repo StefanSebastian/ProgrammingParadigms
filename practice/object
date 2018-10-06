@@ -1,0 +1,11 @@
+declare
+local C in
+   C = {NewCell 0}
+   fun {Incr}
+      C := @C + 1
+      @C
+   end
+   fun {Read} @C end
+end
+{Browse {Incr}}
+{Browse {Read}}

@@ -1,0 +1,4 @@
+declare X in
+thread {Delay 5000} X = 10 end
+thread {Browse X * X} end
+thread {Browse 'start'} end

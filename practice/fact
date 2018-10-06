@@ -1,0 +1,5 @@
+declare
+fun {Add X Y} X+Y end
+fun {Mul X Y} X*Y end
+{Browse {Add 2 3}}
+{Browse {Mul 2 3}}
