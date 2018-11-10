@@ -1,0 +1,6 @@
+Semantic Statements : pair of (statement, environment) (<s>, E)
+
+Execution State (ST, l) : ST = stack of semantic statements, l = single assignment store
+
+Program Execution 
+([(<s>, 0)], 0) => (ST1, l1) => (ST2, l2) ...

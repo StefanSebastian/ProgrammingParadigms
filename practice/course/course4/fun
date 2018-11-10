@@ -1,0 +1,7 @@
+declare Z = 3
+fun {F X}
+   {Browse X}
+   {Browse {X}} 2
+end
+Y = {F fun {$} Z+1 end}
+{Browse Y}

@@ -1,0 +1,6 @@
+select all Ctrl + x, h
+start buffer  Ctrl + ., Ctrl + b
+stop process Ctrl+u, Ctrl+., h
+
+cut Ctrl + w
+paste Ctrl + y
