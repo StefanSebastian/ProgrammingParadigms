@@ -1,5 +1,6 @@
 declare
 fun {RangeProd N M}
+   % product of all numbers in range N-M
    if N == M then
       N
    else
@@ -9,6 +10,7 @@ end
 
 declare
 fun {Comb N K}
+   % Calculates N choose K
    if K == 0 then
       1
    else

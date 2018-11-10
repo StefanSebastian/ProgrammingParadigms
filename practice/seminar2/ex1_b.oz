@@ -1,5 +1,6 @@
 declare
 fun {Comb N K}
+   % N choose K ; computes nominator and denominator progressively
    case K 
    of 0.0 then 1.0
    [] 1.0 then N

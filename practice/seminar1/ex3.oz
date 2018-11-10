@@ -1,5 +1,6 @@
 declare
 fun {Max N M}
+   % Returns the maximum out of N, M
    if N == 0 then
       M
    elseif M == 0 then

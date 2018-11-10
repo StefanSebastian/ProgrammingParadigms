@@ -1,5 +1,6 @@
 declare
 fun {Abs N}
+   % Returns the absolute value of N ; handle both ints and floats
    if {Float.is N} then
       if N >= {IntToFloat 0} then N else ~N end
    else
