@@ -74,22 +74,50 @@ fun {Rename Expr}
    {RenameAux Expr nil nil}
 end
 
+% RenameAux auxiliary function for rename functionality
+% Context ; all variables which are currently bound
+% Mapping ; mapping between old ids and new ids
 fun {RenameAux Expr Context Mapping}
    case Expr of
       nil then nil
-   [] lam(Id LExpr) then local GenId={NewId} NewMapping={Adjoin Mapping Id#GenId}
-			 in lam(GenId {RenameAux LExpr Id|Context NewMapping}) end
-      
-   [] let(Id#Expr1 Expr2) then local GenId={NewId} NewMapping={Adjoin Mapping Id#GenId}
-			       in let(GenId#{RenameAux Expr1 Context Mapping} {RenameAux Expr2 Id|Context NewMapping}) end
-      
-   [] apply(Expr1 Expr2) then apply({RenameAux Expr1 Context Mapping} {RenameAux Expr2 Context Mapping}) 
-   [] Id then if {And {Contains Context Id} {IsMember Mapping Id}} then
-		 {Fetch Mapping Id}
-	      else Id end
+   [] lam(Id LExpr) then local GenId={NewId} NewMapping={Adjoin Mapping Id#GenId}            % On lambda structures : generate new id and add to mapping
+			 in lam(GenId {RenameAux LExpr Id|Context NewMapping}) end           % change the old id, and rename the expression in the fc body
+                                                                                             % the old id is added to bound variables list
+   [] let(Id#Expr1 Expr2) then local GenId={NewId} NewMapping={Adjoin Mapping Id#GenId}                                     % let structure ; gen new id and mapping
+			       in let(GenId#{RenameAux Expr1 Context Mapping} {RenameAux Expr2 Id|Context NewMapping}) end  % change old id, rename expression
+                                                                                                                            % in body with the added id as context
+   [] apply(Expr1 Expr2) then apply({RenameAux Expr1 Context Mapping} {RenameAux Expr2 Context Mapping}) % in case of apply, do rename on both members
+   [] Id then if {And {Contains Context Id} {IsMember Mapping Id}} then % if we find an identifier, if the identifier is part of bound vars and has a mapping
+		 {Fetch Mapping Id}                                     % identifier becomes the value from the mapping
+	      else Id end                                               % otherwise, unchanged
    end   
 end
 
 {Browse {Rename lam(z lam(x z))}}
 {Browse {Rename let(id#lam(z z) apply(id y))}}
-      
+
+% substitution for lambda terms
+% Subs :: {<Id>#<Expr> <Expr>} -> <Expr>
+fun {Subs Id#Expr1 Expr2}
+   {ReplaceId Id Expr1 Expr2} 
+end
+
+fun {ReplaceId Old New Expr}
+   case Expr of
+      nil then nil
+   [] lam(Id LExpr) then
+      if Id \= Old
+      then lam(Id {ReplaceId Old New LExpr})
+      else lam(Id LExpr) end
+   [] let(Id#Expr1 Expr2) then
+      if Id \= Old
+      then let(Id#{ReplaceId Old New Expr1} {ReplaceId Old New Expr2})
+      else let(Id#{ReplaceId Old New Expr1} Expr2) end
+   [] apply(Expr1 Expr2) then apply({ReplaceId Old New Expr1} {ReplaceId Old New Expr2})
+   [] Id then if Id == Old then New else Id end
+   end
+end
+
+{Browse 'Subs'}
+{Browse {Subs x#lam(x x) apply(x y)}} % simple example
+{Browse {Subs x#lam(z z) apply(x lam(x apply(x z)))}} % should only substitute free occurences
