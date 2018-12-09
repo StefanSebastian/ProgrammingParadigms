@@ -102,21 +102,22 @@ fun {Subs Id#Expr1 Expr2}
    {ReplaceId Id Expr1 Expr2} 
 end
 
+% auxiliary function ; replaces Old, which is an id; with New which is an Expresion in Expr, also an Expression
 fun {ReplaceId Old New Expr}
    case Expr of
       nil then nil
    [] lam(Id LExpr) then
-      if Id \= Old
-      then if {Contains {FreeSet New} Id}
-	   then local lam(NId NExpr) = {Rename lam(Id LExpr)} in lam(NId {ReplaceId Old New NExpr}) end
-	   else lam(Id {ReplaceId Old New LExpr}) end
-      else lam(Id LExpr) end
+      if Id \= Old    % if Id of subexpression is not the same as the one to be replaced, means Old is not bound in subexpression
+      then if {Contains {FreeSet New} Id} % checks if the set of free variables of the nex expression contains the id of the considered expression, if needs rename
+	   then local lam(NId NExpr) = {Rename lam(Id LExpr)} in lam(NId {ReplaceId Old New NExpr}) end % positive case, rename the id of the considered expr
+	   else lam(Id {ReplaceId Old New LExpr}) end % don't need to rename id, apply replaceId function on the subexpression
+      else lam(Id LExpr) end % If Id of lam subexpression is equal to the Id which is to be replaced, we can ignore this; because 'Old' is bound inside the expr
    [] let(Id#Expr1 Expr2) then
-      if Id \= Old
-      then if {Contains {FreeSet New} Id}
+      if Id \= Old  % if Id is the same as the one to be replaced, Old is not bound
+      then if {Contains {FreeSet New} Id} % check if needs to rename id
 	   then local let(NId#NExpr1 NExpr2) = {Rename let(Id#Expr1 Expr2)} in let(NId#{ReplaceId Old New NExpr1} {ReplaceId Old New NExpr2}) end
-	   else let(Id#{ReplaceId Old New Expr1} {ReplaceId Old New Expr2}) end
-      else let(Id#{ReplaceId Old New Expr1} Expr2) end
+	   else let(Id#{ReplaceId Old New Expr1} {ReplaceId Old New Expr2}) end % case of no rename, apply replace to Expr1 and Expr2
+      else let(Id#{ReplaceId Old New Expr1} Expr2) end % Old was bound, replace is only applied to Expr1
    [] apply(Expr1 Expr2) then apply({ReplaceId Old New Expr1} {ReplaceId Old New Expr2})
    [] Id then if Id == Old then New else Id end
    end
