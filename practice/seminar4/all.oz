@@ -107,11 +107,15 @@ fun {ReplaceId Old New Expr}
       nil then nil
    [] lam(Id LExpr) then
       if Id \= Old
-      then lam(Id {ReplaceId Old New LExpr})
+      then if {Contains {FreeSet New} Id}
+	   then local lam(NId NExpr) = {Rename lam(Id LExpr)} in lam(NId {ReplaceId Old New NExpr}) end
+	   else lam(Id {ReplaceId Old New LExpr}) end
       else lam(Id LExpr) end
    [] let(Id#Expr1 Expr2) then
       if Id \= Old
-      then let(Id#{ReplaceId Old New Expr1} {ReplaceId Old New Expr2})
+      then if {Contains {FreeSet New} Id}
+	   then local let(NId#NExpr1 NExpr2) = {Rename let(Id#Expr1 Expr2)} in let(NId#{ReplaceId Old New NExpr1} {ReplaceId Old New NExpr2}) end
+	   else let(Id#{ReplaceId Old New Expr1} {ReplaceId Old New Expr2}) end
       else let(Id#{ReplaceId Old New Expr1} Expr2) end
    [] apply(Expr1 Expr2) then apply({ReplaceId Old New Expr1} {ReplaceId Old New Expr2})
    [] Id then if Id == Old then New else Id end
@@ -119,5 +123,6 @@ fun {ReplaceId Old New Expr}
 end
 
 {Browse 'Subs'}
-{Browse {Subs x#lam(x x) apply(x y)}} % simple example
-{Browse {Subs x#lam(z z) apply(x lam(x apply(x z)))}} % should only substitute free occurences
+{Browse {Subs x#lam(x x) apply(x y)}} % simple example ; should be apply(lam(x x) y)
+{Browse {Subs x#lam(z z) apply(x lam(x apply(x z)))}} % should only substitute free occurences ; should be apply(lam(z z) lam(x apply(x z)))
+{Browse {Subs x#lam(y z) apply(x lam(z apply(x z)))}} % clash between free vars with bound vars; should be apply(lam(y z) lam(id<1> apply(lam(y z) id<1>)))
