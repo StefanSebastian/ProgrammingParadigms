@@ -22,6 +22,7 @@ fun {FreeSetAux Expr Context}
    end
 end
 
+{Browse 'Free variables'}
 {Browse {FreeSet apply(x let(x#y x))}}            % should be [x y]
 {Browse {FreeSet apply(y apply(let(x#x x) y))}}   % should be [y y]
 
@@ -61,6 +62,16 @@ fun {RemoveId Env Id}
    end
 end
 
+{Browse 'Environment/Mapping'}
+local E1='E1' E3='E3' E4='E4' in
+   {Browse {IsMember [a#E1 b#y c#E3] c}} % true
+   {Browse {IsMember [a#E1 b#y c#E3] y}} % false
+   {Browse {Fetch [a#E1 b#y c#E3] c}} % returns E3
+   {Browse {Fetch [a#E1 b#y c#E3] d}} % returns d
+   {Browse {Adjoin [a#E1 b#y c#E3] c#E4}}
+   {Browse {Adjoin [a#E1 b#y c#E3] d#E4}}
+end
+
 % new id generator
 declare
 Cnt={NewCell 0}
@@ -93,8 +104,9 @@ fun {RenameAux Expr Context Mapping}
    end   
 end
 
-{Browse {Rename lam(z lam(x z))}}
-{Browse {Rename let(id#lam(z z) apply(id y))}}
+{Browse 'Renaming'}
+{Browse {Rename lam(z lam(x z))}} % lam(id<1> lam(id<2> id<1>)
+{Browse {Rename let(id#lam(z z) apply(id y))}} % let(id<3>#lam(id<4> id<4>) apply(id<3> y))
 
 % substitution for lambda terms
 % Subs :: {<Id>#<Expr> <Expr>} -> <Expr>
@@ -123,7 +135,7 @@ fun {ReplaceId Old New Expr}
    end
 end
 
-{Browse 'Subs'}
+{Browse 'Substitution'}
 {Browse {Subs x#lam(x x) apply(x y)}} % simple example ; should be apply(lam(x x) y)
 {Browse {Subs x#lam(z z) apply(x lam(x apply(x z)))}} % should only substitute free occurences ; should be apply(lam(z z) lam(x apply(x z)))
 {Browse {Subs x#lam(y z) apply(x lam(z apply(x z)))}} % clash between free vars with bound vars; should be apply(lam(y z) lam(id<1> apply(lam(y z) id<1>)))
